@@ -23,7 +23,7 @@ on:
       docker_img:
         description: "Set the docker image"
         required: false
-        default: "ophub/openwrt-aarch64:latest"
+        default: "${DOCKERHUB_USERNAME}/openwrt-aarch64:latest"
         type: choice
         options:
           - ophub/openwrt-aarch64:latest
