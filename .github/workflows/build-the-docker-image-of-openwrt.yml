@@ -92,6 +92,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          platforms: linux/arm64
+          platforms: linux/arm64,linux/amd64
           context: ${{ env.DOCKER_OUTPATH }}
           tags: "${{ inputs.docker_img }}"
