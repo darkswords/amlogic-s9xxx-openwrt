@@ -26,7 +26,7 @@ on:
         default: "${{ secrets.DOCKERHUB_USERNAME }}/openwrt-aarch64:latest"
         type: choice
         options:
-          - ophub/openwrt-aarch64:latest
+          - ${{ secrets.DOCKERHUB_USERNAME }}/openwrt-aarch64:latest
 
 env:
   TZ: America/New_York
@@ -94,4 +94,4 @@ jobs:
           push: true
           platforms: linux/arm64
           context: ${{ env.DOCKER_OUTPATH }}
-          tags: "${{ inputs.docker_img }}"
+          tags: "${{ secrets.DOCKERHUB_USERNAME }}:latest"
