@@ -19,7 +19,7 @@ on:
         default: "${{ secrets.DOCKERHUB_USERNAME }}/openwrt-aarch64:latest"
         type: choice
         options:
-          - "${{ secrets.DOCKERHUB_USERNAME }}/openwrt-aarch64:latest"
+          - option/openwrt-aarch64:latest
 
 env:
   TZ: America/New_York
