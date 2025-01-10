@@ -1,10 +1,3 @@
-#=====================================================================================
-# https://github.com/ophub/amlogic-s9xxx-openwrt
-# Description: Build the Docker image of OpenWrt
-# Instructions: https://github.com/docker/build-push-action
-# Build and Push to: https://hub.docker.com/
-#=====================================================================================
-
 name: Build the Docker image of OpenWrt
 
 on:
@@ -94,4 +87,5 @@ jobs:
           push: true
           platforms: linux/arm64
           context: ${{ env.DOCKER_OUTPATH }}
-          tags: "${{ inputs.docker_img }}"
+          tags: "${{ secrets.DOCKERHUB_USERNAME }}/openwrt-aarch64:latest"
+          
