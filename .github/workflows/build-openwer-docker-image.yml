@@ -8,7 +8,7 @@
 name: Build OpenWrt Docker image
 
 on:
-  repository_dispatch:
+  #repository_dispatch:
   workflow_dispatch:
     inputs:
       source_branch:
