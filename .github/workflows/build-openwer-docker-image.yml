@@ -8,20 +8,18 @@
 name: Build OpenWrt Docker image
 
 on:
-  #repository_dispatch:
+  repository_dispatch:
   workflow_dispatch:
     inputs:
       source_branch:
         description: "Select the source branch"
         required: false
-        default: "openwrt_openwrt-24.10"
+        default: "official"
         type: choice
         options:
-          - openwrt_main
-          - openwrt_openwrt-24.10
-          - immortalwrt_master
-          - immortalwrt_openwrt-24.10
-          - lede_master
+          - official
+          - lede
+          - immortalwrt
       docker_img:
         description: "Set the docker image"
         required: false
