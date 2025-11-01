@@ -6,7 +6,7 @@
 name: Build OpenWrt system image
 
 on:
-  repository_dispatch:
+  #repository_dispatch:
   workflow_dispatch:
     inputs:
       source_branch:
