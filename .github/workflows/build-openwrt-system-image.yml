@@ -12,14 +12,12 @@ on:
       source_branch:
         description: "Select the source branch"
         required: false
-        default: "openwrt_openwrt-24.10"
+        default: "openwrt-main"
         type: choice
         options:
-          - openwrt_main
-          - openwrt_openwrt-24.10
-          - immortalwrt_master
-          - immortalwrt_openwrt-24.10
-          - lede_master
+          - openwrt-main
+          - lede-master
+          - immortalwrt-master
       openwrt_board:
         description: "Select device board"
         required: false
@@ -312,32 +310,34 @@ jobs:
         if: ${{ steps.init.outputs.status }} == 'success' && !cancelled()
         run: |
           # Set up compilation source code
-          if [[ "${{ inputs.source_branch }}" =~ ^openwrt ]]; then
+          if [[ "${{ inputs.source_branch }}" == *"openwrt"* ]]; then
               REPO_URL="https://github.com/openwrt/openwrt"
-          elif [[ "${{ inputs.source_branch }}" =~ ^lede ]]; then
+              REPO_BRANCH="main"
+              TAGS_NAME="official"
+          elif [[ "${{ inputs.source_branch }}" == *"lede"* ]]; then
               REPO_URL="https://github.com/coolsnowwolf/lede"
-          elif [[ "${{ inputs.source_branch }}" =~ ^immortalwrt ]]; then
+              REPO_BRANCH="master"
+              TAGS_NAME="lede"
+          elif [[ "${{ inputs.source_branch }}" == *"immortalwrt"* ]]; then
               REPO_URL="https://github.com/immortalwrt/immortalwrt"
+              REPO_BRANCH="master"
+              TAGS_NAME="immortalwrt"
           else
               echo "Unknown source code repository."
               exit 1
           fi
-          source_branch_input="${{ inputs.source_branch }}"
-          REPO_NAME="${source_branch_input%_*}"
-          REPO_BRANCH="${source_branch_input##*_}"
 
           # Clone source code
           git clone -q --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} openwrt
-          ln -sf /builder/openwrt ${{ github.workspace }}/openwrt
+          ln -sf /builder/openwrt ${GITHUB_WORKSPACE}/openwrt
           ln -sf /builder/openwrt /home/runner/work/_actions/ophub/amlogic-s9xxx-openwrt/main/openwrt
 
           # Set output information
-          echo "build_tag=OpenWrt_${{ inputs.source_branch }}_${{ inputs.openwrt_storage }}_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
-          echo -e "REPO_URL: [ ${REPO_URL} ]\nREPO_BRANCH: [ ${REPO_BRANCH} ]\nREPO_NAME: [ ${REPO_NAME} ]"
+          echo "build_tag=OpenWrt_${TAGS_NAME}_${{ inputs.openwrt_storage }}_$(date +"%Y.%m")" >> ${GITHUB_OUTPUT}
+          echo -e "REPO_URL: [ ${REPO_URL} ]\nREPO_BRANCH: [ ${REPO_BRANCH} ]\nTAGS_NAME: [ ${TAGS_NAME} ]"
           df -hT ${PWD}
           echo "REPO_URL=${REPO_URL}" >> ${GITHUB_OUTPUT}
-          echo "REPO_NAME=${REPO_NAME}" >> ${GITHUB_OUTPUT}
-          echo "REPO_BRANCH=${REPO_BRANCH}" >> ${GITHUB_OUTPUT}
+          echo "TAGS_NAME=${TAGS_NAME}" >> ${GITHUB_OUTPUT}
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Load custom feeds
@@ -345,7 +345,7 @@ jobs:
           [[ -f "${FEEDS_CONF}" ]] && cp -f ${FEEDS_CONF} openwrt/feeds.conf.default
           chmod +x ${DIY_P1_SH}
           cd openwrt/
-          ${{ github.workspace }}/${DIY_P1_SH}
+          ${GITHUB_WORKSPACE}/${DIY_P1_SH}
 
       - name: Update feeds
         run: cd openwrt/ && ./scripts/feeds update -a
@@ -359,7 +359,7 @@ jobs:
           [[ -e "${CONFIG_FILE}" ]] && cp -f ${CONFIG_FILE} openwrt/.config
           chmod +x ${DIY_P2_SH}
           cd openwrt/
-          ${{ github.workspace }}/${DIY_P2_SH}
+          ${GITHUB_WORKSPACE}/${DIY_P2_SH}
 
       - name: Download package
         id: package
@@ -390,8 +390,8 @@ jobs:
           rm -rf $(ls . | grep -v "^output$" | xargs) 2>/dev/null
 
           # Generate sha256sum file
-          #cd output/
-          #for file in *; do [[ ! -d "${file}" ]] && sha256sum "${file}" >"${file}.sha"; done
+          cd output/
+          for file in *; do [[ ! -d "${file}" ]] && sha256sum "${file}" >"${file}.sha"; done
 
           # Set output information
           df -hT ${PWD}
@@ -440,6 +440,6 @@ jobs:
             ### Install to EMMC
             - Login to OpenWrt → System → Amlogic Service → Install OpenWrt
             ### OpenWrt source code
-            - [${{ steps.codes.outputs.REPO_NAME }}](${{ steps.codes.outputs.REPO_URL }}/tree/${{ steps.codes.outputs.REPO_BRANCH }})
+            - [${{ steps.codes.outputs.TAGS_NAME }}](${{ steps.codes.outputs.REPO_URL }})
             ### OpenWrt Image Verification
             - sha256sum
